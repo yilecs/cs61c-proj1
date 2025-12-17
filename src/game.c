@@ -293,7 +293,23 @@ static void update_tail(game_t *game, unsigned int snum) {
 /* Task 4.5 */
 void update_game(game_t *game, int (*add_food)(game_t *game)) {
     // TODO: Implement this function.
-    return;
+    for (unsigned int i = 0; i < game->num_snakes; i++) {
+        if (!game->snakes[i].live) {
+            continue;
+        }
+
+        char next_char = next_square(game, i);
+        if (is_snake(next_char) || next_char == '#') {
+            game->snakes[i].live = false;
+            set_board_at(game, game->snakes[i].head_row, game->snakes[i].head_col, 'x');
+        } else if (next_char == '*') {
+            update_head(game, i);
+            (*add_food)(game);
+        } else {
+            update_head(game, i);
+            update_tail(game, i);
+        }
+    }
 }
 
 /* Task 5.1 */
