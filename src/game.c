@@ -9,16 +9,27 @@
 
 /* Helper function definitions */
 static void set_board_at(game_t *game, unsigned int row, unsigned int col, char ch);
+
 static bool is_tail(char c);
+
 static bool is_head(char c);
+
 static bool is_snake(char c);
+
 static char body_to_tail(char c);
+
 static char head_to_body(char c);
+
 static unsigned int get_next_row(unsigned int cur_row, char c);
+
 static unsigned int get_next_col(unsigned int cur_col, char c);
+
 static void find_head(game_t *game, unsigned int snum);
+
 static char next_square(game_t *game, unsigned int snum);
+
 static void update_tail(game_t *game, unsigned int snum);
+
 static void update_head(game_t *game, unsigned int snum);
 
 /* Task 1 */
@@ -345,7 +356,7 @@ game_t *load_board(FILE *fp) {
         num_rows++;
     }
     board = realloc(board, sizeof(char *) * num_rows);
-    
+
     game->board = board;
     game->num_rows = num_rows;
 
@@ -376,6 +387,30 @@ static void find_head(game_t *game, unsigned int snum) {
 
 /* Task 6.2 */
 game_t *initialize_snakes(game_t *game) {
-    // TODO: Implement this function.
-    return NULL;
+    unsigned int initial_num_snakes = 10;
+    unsigned int num_snakes = 0;
+    game->snakes = malloc(sizeof(snake_t) * initial_num_snakes);
+    for (unsigned int row = 0; row < game->num_rows; row++) {
+        unsigned int cols = strlen(game->board[row]);
+        for (unsigned int col = 0; col < cols; col++) {
+            if (is_tail(get_board_at(game, row, col))) {
+                if (num_snakes == initial_num_snakes) {
+                    initial_num_snakes *= 2;
+                    game->snakes = realloc(game->snakes, sizeof(snake_t) * initial_num_snakes);
+                }
+                game->snakes[num_snakes].tail_row = row;
+                game->snakes[num_snakes].tail_col = col;
+                game->snakes[num_snakes].live = true;
+
+                find_head(game, num_snakes);
+
+                num_snakes++;
+            }
+        }
+    }
+
+    game->snakes = realloc(game->snakes, sizeof(snake_t) * num_snakes);
+    game->num_snakes = num_snakes;
+
+    return game;
 }
