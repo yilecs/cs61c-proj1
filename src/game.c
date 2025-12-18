@@ -324,15 +324,47 @@ void update_game(game_t *game, int (*add_food)(game_t *game)) {
 
 /* Task 5.1 */
 char *read_line(FILE *fp) {
-    const int MAX_CHARS = 100;
-    char line[MAX_CHARS];
-    if (fgets(line, MAX_CHARS, fp) != NULL) {
-        size_t length = strlen(line);
-        char *result = malloc(sizeof(char) * (length + 1));
-        strcpy(result, line);
-        return result;
+    if (fp == NULL) {
+        return NULL;
     }
-    return NULL;
+    if (feof(fp)) {
+        return NULL;
+    }
+
+    const int CHUNK_SIZE = 128;
+    char buffer[CHUNK_SIZE];
+    char *line = NULL;
+    size_t total_len = 0;
+
+    // reset buffer
+    buffer[0] = '\0';
+
+    while (fgets(buffer, CHUNK_SIZE, fp) != NULL) {
+        size_t chunk_len = strlen(buffer);
+
+        char *temp = realloc(line, sizeof(char) *(total_len + chunk_len + 1));
+        if (temp == NULL) {
+            free(line);
+            return NULL;
+        }
+        line = temp;
+
+        // copy buffer to line end
+        strcpy(line + total_len, buffer);
+        total_len += chunk_len;
+
+        // check if read to \n or EOF
+        if (chunk_len > 0) {
+            if (buffer[chunk_len - 1] == '\n' || chunk_len < CHUNK_SIZE - 1) {
+                break;
+            }
+        } else {
+            // read nothing
+            break;
+        }
+    }
+
+    return line;
 }
 
 /* Task 5.2 */
